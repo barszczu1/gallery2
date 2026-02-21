@@ -1,13 +1,76 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tole-gallery</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tole Tole</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <header class="page-header">
+      <h1 class="title">Tole Tole</h1>
+      <p class="subtitle">
+        美美是一只短尾的家养短毛猫，毛色为黑色的细纹虎斑（ticked
+        tabby）。她被送到收容所时是一只怀孕的流浪猫。2022年6月15日，收容所的工作人员联系了我，询问我是否愿意领养她。我欣然同意，并领养了这只后来被称为“托乐托乐”（Tole
+        Tole）的猫。
+      </p>
+    </header>
+
+    <main class="wrap">
+      <section
+        id="gallery"
+        class="gallery"
+        aria-label="Image gallery"
+      ></section>
+    </main>
+
+    <!-- Lightbox / Modal -->
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+      <div class="lightbox__backdrop" data-close></div>
+
+      <div
+        class="lightbox__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Image viewer"
+      >
+        <button
+          class="lightbox__close"
+          type="button"
+          aria-label="Close"
+          data-close
+        >
+          ✕
+        </button>
+
+        <button
+          id="prevBtn"
+          class="lightbox__nav lightbox__nav--left"
+          type="button"
+          aria-label="Previous image"
+        >
+          ‹
+        </button>
+
+        <figure class="lightbox__figure">
+          <img id="lightboxImg" class="lightbox__img" alt="" />
+          <figcaption
+            id="lightboxCaption"
+            class="lightbox__caption"
+          ></figcaption>
+        </figure>
+
+        <button
+          id="nextBtn"
+          class="lightbox__nav lightbox__nav--right"
+          type="button"
+          aria-label="Next image"
+        >
+          ›
+        </button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
   </body>
 </html>

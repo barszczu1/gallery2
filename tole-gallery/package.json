@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prestart": "node ./public/tools/generate-manifest.cjs",
     "start": "vite",
+    "prebuild": "node ./public/tools/generate-manifest.cjs",
     "build": "vite build",
     "preview": "vite preview"
   },
