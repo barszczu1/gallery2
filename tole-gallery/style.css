@@ -9,22 +9,12 @@
   --maxw: 980px;
 }
 
-* {
-  box-sizing: border-box;
-}
-html,
-body {
-  height: 100%;
-}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
 body {
   margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Arial,
-    sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
@@ -51,25 +41,20 @@ body {
   padding: 14px 16px 40px;
 }
 
-/* Responsive grid */
+/* Gallery max 3 columns */
 .gallery {
   display: grid;
   gap: var(--gap);
   grid-template-columns: 1fr;
 }
-
 @media (min-width: 560px) {
-  .gallery {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 900px) {
+  .gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
-@media (min-width: 900px) {
-  .gallery {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-/* Thumbnail button */
+/* Thumbs */
 .thumb {
   border: 0;
   background: transparent;
@@ -78,70 +63,65 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
+  transition: opacity 180ms ease;
 }
-
 .thumb__frame {
   background: var(--card);
   width: 100%;
-  aspect-ratio: 1 / 1; /* all same aspect ratio */
+  aspect-ratio: 1 / 1;
   display: block;
-  position: relative;
 }
-
 .thumb__img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* crop to fill */
+  object-fit: cover;
   display: block;
   transform: scale(1.001);
   transition: transform 500ms ease;
 }
-
+@media (hover:hover) {
+  .thumb:hover .thumb__img { transform: scale(1.05); }
+}
 .thumb:focus-visible {
-  outline: 3px solid rgba(0, 0, 0, 0.25);
+  outline: 3px solid rgba(0,0,0,.25);
   outline-offset: 3px;
 }
 
-@media (hover: hover) {
-  .thumb:hover .thumb__img {
-    transform: scale(1.05);
-  }
+/* Fade gallery away when viewer open */
+body.viewer-open .thumb {
+  opacity: 0;
+  pointer-events: none;
 }
-/* Lightbox overlay */
+
+/* Lightbox overlay (NO background) */
 .lightbox {
   position: fixed;
   inset: 0;
-  display: none;
   z-index: 9999;
+
+  display: none;            /* IMPORTANT: hidden by default */
+  place-items: center;
+
+  padding: clamp(16px, 5vw, 72px); /* click-off space */
+  background: transparent;
+  cursor: zoom-out;
 }
+
 .lightbox.is-open {
-  display: block;
+  display: grid;            /* shows only when opened */
 }
 
-/* Backdrop */
-.lightbox__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  opacity: 0;
-}
-
-/* Dialog (NOT full screen) */
 .lightbox__dialog {
   position: relative;
-  width: min(920px, calc(100vw - 28px));
-  margin: 14px auto;
-  border-radius: 18px;
-  background: rgba(20, 20, 20, 0.92);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
-  overflow: hidden;
-  padding: 14px;
+  width: min(920px, 100%);
+  background: transparent;
+  cursor: default;
 
   opacity: 0;
   transform: scale(0.6);
 }
 
-/* Layout: arrows outside the image */
+/* arrows outside the image */
 .lightbox__layout {
   display: grid;
   grid-template-columns: 54px 1fr 54px;
@@ -149,7 +129,6 @@ body {
   align-items: center;
 }
 
-/* Image box (confined) */
 .lightbox__figure {
   margin: 0;
   display: grid;
@@ -158,10 +137,10 @@ body {
 
 .lightbox__media {
   width: 100%;
-  height: min(70vh, 560px); /* <-- keeps it from becoming full-screen */
-  background: #111;
+  height: min(70vh, 560px);
   border-radius: 14px;
   overflow: hidden;
+  background: transparent;
 }
 
 .lightbox__img {
@@ -173,23 +152,22 @@ body {
 
 .lightbox__caption {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
-  padding: 0 6px;
+  color: rgba(0,0,0,.7);
   text-align: center;
 }
 
-/* Close + arrows */
+/* Controls */
 .lightbox__close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 14px;
+  right: 14px;
   border: 0;
   width: 40px;
   height: 40px;
   border-radius: 999px;
   cursor: pointer;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
+  color: #111;
+  background: rgba(255,255,255,.85);
 }
 
 .lightbox__nav {
@@ -197,102 +175,45 @@ body {
   width: 54px;
   height: 64px;
   cursor: pointer;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
+  color: #111;
+  background: rgba(255,255,255,.85);
   border-radius: 14px;
   font-size: 34px;
   line-height: 1;
   display: grid;
   place-items: center;
 }
-
 .lightbox__nav.is-hidden {
   opacity: 0;
   pointer-events: none;
 }
 
-/* POP IN (fast) */
-.lightbox.is-visible .lightbox__backdrop {
-  animation: backdropIn 120ms ease-out forwards;
-}
+/* Pop animation */
 .lightbox.is-visible .lightbox__dialog {
   animation: popIn 180ms cubic-bezier(0.2, 0.9, 0.2, 1.2) forwards;
-}
-
-/* POP OUT (fast) */
-.lightbox.is-closing .lightbox__backdrop {
-  animation: backdropOut 120ms ease-in forwards;
 }
 .lightbox.is-closing .lightbox__dialog {
   animation: popOut 140ms ease-in forwards;
 }
-
-@keyframes backdropIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes backdropOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
 @keyframes popIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1.03);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+  0% { opacity: 0; transform: scale(0.6); }
+  70% { opacity: 1; transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
 }
 @keyframes popOut {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.92);
-  }
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.92); }
 }
 
 @media (max-width: 520px) {
-  .lightbox__layout {
-    grid-template-columns: 44px 1fr 44px;
-    gap: 8px;
-  }
-  .lightbox__nav {
-    width: 44px;
-    height: 56px;
-    font-size: 30px;
-  }
+  .lightbox__layout { grid-template-columns: 44px 1fr 44px; gap: 8px; }
+  .lightbox__nav { width: 44px; height: 56px; font-size: 30px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lightbox.is-visible .lightbox__backdrop,
   .lightbox.is-visible .lightbox__dialog,
-  .lightbox.is-closing .lightbox__backdrop,
   .lightbox.is-closing .lightbox__dialog {
     animation: none !important;
   }
-  .lightbox__backdrop {
-    opacity: 1;
-  }
-  .lightbox__dialog {
-    opacity: 1;
-    transform: scale(1);
-  }
+  .lightbox__dialog { opacity: 1; transform: scale(1); }
 }

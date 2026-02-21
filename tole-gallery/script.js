@@ -1,6 +1,7 @@
 const GALLERY_EL = document.getElementById("gallery");
 
 const LIGHTBOX = document.getElementById("lightbox");
+const DIALOG = document.querySelector(".lightbox__dialog");
 const LIGHTBOX_IMG = document.getElementById("lightboxImg");
 const LIGHTBOX_CAPTION = document.getElementById("lightboxCaption");
 const PREV_BTN = document.getElementById("prevBtn");
@@ -8,18 +9,16 @@ const NEXT_BTN = document.getElementById("nextBtn");
 
 const MANIFEST_URL = "./assets/tole/manifest.json";
 
-let images = []; // filenames
+let images = [];
 let basePath = "./assets/tole/";
 let currentIndex = 0;
 
-// --------- Load manifest + build grid ----------
 (async function init() {
   try {
     const res = await fetch(MANIFEST_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(`Manifest fetch failed: ${res.status}`);
     const data = await res.json();
 
-    // Accept either { basePath, images: [...] } or just [...]
     if (Array.isArray(data)) {
       images = data;
     } else {
@@ -32,8 +31,7 @@ let currentIndex = 0;
     console.error(err);
     GALLERY_EL.innerHTML = `
       <p style="color:#b00020">
-        Could not load <code>${MANIFEST_URL}</code>.<br/>
-        Generate it using <code>node tools/generate-manifest.js</code>.
+        Could not load <code>${MANIFEST_URL}</code>.
       </p>`;
   }
 })();
@@ -53,12 +51,11 @@ function buildGallery(files) {
     const img = document.createElement("img");
     img.className = "thumb__img";
     img.loading = "lazy";
-    img.src = `${basePath}${filename}`;
+    img.src = encodeURI(`${basePath}${filename}`);
     img.alt = filename;
 
     frame.appendChild(img);
     btn.appendChild(frame);
-
     btn.addEventListener("click", () => openLightbox(index));
 
     GALLERY_EL.appendChild(btn);
@@ -74,11 +71,10 @@ function openLightbox(index) {
   LIGHTBOX.classList.remove("is-closing");
   LIGHTBOX.classList.add("is-open");
   LIGHTBOX.setAttribute("aria-hidden", "false");
-  document.documentElement.style.overflow = "hidden";
 
-  void LIGHTBOX.offsetWidth; // restart animation
+  // restart animation
+  void LIGHTBOX.offsetWidth;
   LIGHTBOX.classList.add("is-visible");
-  document.body.classList.add("viewer-open");
 }
 
 function closeLightbox() {
@@ -87,43 +83,24 @@ function closeLightbox() {
   LIGHTBOX.classList.add("is-closing");
   LIGHTBOX.classList.remove("is-visible");
   LIGHTBOX.setAttribute("aria-hidden", "true");
-  document.documentElement.style.overflow = "";
 
-  const prefersReduced = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const delay = prefersReduced ? 0 : 160;
-  document.body.classList.remove("viewer-open");
+
   window.setTimeout(() => {
     LIGHTBOX.classList.remove("is-open");
     LIGHTBOX.classList.remove("is-closing");
   }, delay);
 }
 
-/* click OFF the image closes it */
-LIGHTBOX.addEventListener("click", (e) => {
-  // if you clicked the empty overlay area (not the dialog)
-  if (e.target === LIGHTBOX) closeLightbox();
-});
-
-/* prevent clicks inside the dialog from closing */
-LIGHTBOX.querySelector(".lightbox__dialog").addEventListener("click", (e) => {
-  e.stopPropagation();
-});
-
-/* close button */
-LIGHTBOX.addEventListener("click", (e) => {
-  if (e.target.matches("[data-close]")) closeLightbox();
-});
 function renderLightbox() {
   const filename = images[currentIndex];
   if (!filename) return;
 
-  LIGHTBOX_IMG.src = `${basePath}${filename}`;
+  LIGHTBOX_IMG.src = encodeURI(`${basePath}${filename}`);
   LIGHTBOX_IMG.alt = filename;
   LIGHTBOX_CAPTION.textContent = filename;
 
-  // Hide arrows at ends
   PREV_BTN.classList.toggle("is-hidden", currentIndex === 0);
   NEXT_BTN.classList.toggle("is-hidden", currentIndex === images.length - 1);
 }
@@ -140,54 +117,26 @@ function nextImage() {
   renderLightbox();
 }
 
-// Buttons
-PREV_BTN.addEventListener("click", (e) => {
-  e.stopPropagation();
-  prevImage();
-});
-NEXT_BTN.addEventListener("click", (e) => {
-  e.stopPropagation();
-  nextImage();
+PREV_BTN.addEventListener("click", (e) => { e.stopPropagation(); prevImage(); });
+NEXT_BTN.addEventListener("click", (e) => { e.stopPropagation(); nextImage(); });
+
+// Click outside image closes (transparent overlay)
+LIGHTBOX.addEventListener("click", (e) => {
+  if (e.target === LIGHTBOX) closeLightbox();
 });
 
-// Close on backdrop / close button
+// Prevent clicks inside from closing
+DIALOG.addEventListener("click", (e) => e.stopPropagation());
+
+// Close button
 LIGHTBOX.addEventListener("click", (e) => {
   if (e.target.matches("[data-close]")) closeLightbox();
 });
 
-// Keyboard support
+// Keyboard
 document.addEventListener("keydown", (e) => {
-  const isOpen = LIGHTBOX.classList.contains("is-open");
-  if (!isOpen) return;
-
+  if (!LIGHTBOX.classList.contains("is-open")) return;
   if (e.key === "Escape") closeLightbox();
   if (e.key === "ArrowLeft") prevImage();
   if (e.key === "ArrowRight") nextImage();
 });
-
-// Touch swipe (simple)
-let touchStartX = null;
-LIGHTBOX.addEventListener(
-  "touchstart",
-  (e) => {
-    touchStartX = e.touches?.[0]?.clientX ?? null;
-  },
-  { passive: true },
-);
-
-LIGHTBOX.addEventListener(
-  "touchend",
-  (e) => {
-    if (touchStartX == null) return;
-    const endX = e.changedTouches?.[0]?.clientX ?? touchStartX;
-    const dx = endX - touchStartX;
-    touchStartX = null;
-
-    // swipe threshold
-    if (Math.abs(dx) < 40) return;
-
-    if (dx > 0) prevImage();
-    else nextImage();
-  },
-  { passive: true },
-);
