@@ -69,24 +69,21 @@ function openLightbox(index) {
   currentIndex = index;
   renderLightbox();
 
-  // reset closing state so animation can replay
+  document.body.classList.add("viewer-open");
+
   LIGHTBOX.classList.remove("is-closing");
   LIGHTBOX.classList.add("is-open");
   LIGHTBOX.setAttribute("aria-hidden", "false");
   document.documentElement.style.overflow = "hidden";
 
-  // force reflow so animation restarts reliably
-  void LIGHTBOX.offsetWidth;
-
-  // trigger pop-in
+  void LIGHTBOX.offsetWidth; // restart animation
   LIGHTBOX.classList.add("is-visible");
-
-  const closeBtn = LIGHTBOX.querySelector("[data-close]");
-  closeBtn?.focus();
+  document.body.classList.add("viewer-open");
 }
 
 function closeLightbox() {
-  // trigger pop-out
+  document.body.classList.remove("viewer-open");
+
   LIGHTBOX.classList.add("is-closing");
   LIGHTBOX.classList.remove("is-visible");
   LIGHTBOX.setAttribute("aria-hidden", "true");
@@ -95,15 +92,29 @@ function closeLightbox() {
   const prefersReduced = window.matchMedia(
     "(prefers-reduced-motion: reduce)",
   ).matches;
-  const delay = prefersReduced ? 0 : 150;
-
+  const delay = prefersReduced ? 0 : 160;
+  document.body.classList.remove("viewer-open");
   window.setTimeout(() => {
     LIGHTBOX.classList.remove("is-open");
     LIGHTBOX.classList.remove("is-closing");
   }, delay);
 }
 
+/* click OFF the image closes it */
+LIGHTBOX.addEventListener("click", (e) => {
+  // if you clicked the empty overlay area (not the dialog)
+  if (e.target === LIGHTBOX) closeLightbox();
+});
 
+/* prevent clicks inside the dialog from closing */
+LIGHTBOX.querySelector(".lightbox__dialog").addEventListener("click", (e) => {
+  e.stopPropagation();
+});
+
+/* close button */
+LIGHTBOX.addEventListener("click", (e) => {
+  if (e.target.matches("[data-close]")) closeLightbox();
+});
 function renderLightbox() {
   const filename = images[currentIndex];
   if (!filename) return;
