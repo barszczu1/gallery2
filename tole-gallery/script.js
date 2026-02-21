@@ -8,7 +8,7 @@ const NEXT_BTN = document.getElementById("nextBtn");
 
 const MANIFEST_URL = "./assets/tole/manifest.json";
 
-let images = [];     // filenames
+let images = []; // filenames
 let basePath = "./assets/tole/";
 let currentIndex = 0;
 
@@ -65,31 +65,52 @@ function buildGallery(files) {
   });
 }
 
-// --------- Lightbox open/close + navigation ----------
 function openLightbox(index) {
   currentIndex = index;
   renderLightbox();
 
-  // show
+  // reset closing state so animation can replay
+  LIGHTBOX.classList.remove("is-closing");
   LIGHTBOX.classList.add("is-open");
   LIGHTBOX.setAttribute("aria-hidden", "false");
   document.documentElement.style.overflow = "hidden";
 
-  // trigger animation in next frame
-  requestAnimationFrame(() => LIGHTBOX.classList.add("is-visible"));
+  // force reflow so animation restarts reliably
+  void LIGHTBOX.offsetWidth;
 
-  // focus close button for accessibility
+  // trigger pop-in
+  LIGHTBOX.classList.add("is-visible");
+
   const closeBtn = LIGHTBOX.querySelector("[data-close]");
   closeBtn?.focus();
 }
 
+function closeLightbox() {
+  // trigger pop-out
+  LIGHTBOX.classList.add("is-closing");
+  LIGHTBOX.classList.remove("is-visible");
+  LIGHTBOX.setAttribute("aria-hidden", "true");
+  document.documentElement.style.overflow = "";
+
+  const prefersReduced = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  const delay = prefersReduced ? 0 : 150;
+
+  window.setTimeout(() => {
+    LIGHTBOX.classList.remove("is-open");
+    LIGHTBOX.classList.remove("is-closing");
+  }, delay);
+}
 function closeLightbox() {
   LIGHTBOX.classList.remove("is-visible");
   LIGHTBOX.setAttribute("aria-hidden", "true");
   document.documentElement.style.overflow = "";
 
   // wait for transition to finish, then fully hide
-  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prefersReduced = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
   const delay = prefersReduced ? 0 : 240;
 
   window.setTimeout(() => {
@@ -149,19 +170,27 @@ document.addEventListener("keydown", (e) => {
 
 // Touch swipe (simple)
 let touchStartX = null;
-LIGHTBOX.addEventListener("touchstart", (e) => {
-  touchStartX = e.touches?.[0]?.clientX ?? null;
-}, { passive: true });
+LIGHTBOX.addEventListener(
+  "touchstart",
+  (e) => {
+    touchStartX = e.touches?.[0]?.clientX ?? null;
+  },
+  { passive: true },
+);
 
-LIGHTBOX.addEventListener("touchend", (e) => {
-  if (touchStartX == null) return;
-  const endX = e.changedTouches?.[0]?.clientX ?? touchStartX;
-  const dx = endX - touchStartX;
-  touchStartX = null;
+LIGHTBOX.addEventListener(
+  "touchend",
+  (e) => {
+    if (touchStartX == null) return;
+    const endX = e.changedTouches?.[0]?.clientX ?? touchStartX;
+    const dx = endX - touchStartX;
+    touchStartX = null;
 
-  // swipe threshold
-  if (Math.abs(dx) < 40) return;
+    // swipe threshold
+    if (Math.abs(dx) < 40) return;
 
-  if (dx > 0) prevImage();
-  else nextImage();
-}, { passive: true });
+    if (dx > 0) prevImage();
+    else nextImage();
+  },
+  { passive: true },
+);
