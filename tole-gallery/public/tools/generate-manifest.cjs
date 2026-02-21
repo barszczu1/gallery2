@@ -1,11 +1,11 @@
 // tools/generate-manifest.js
-// Generates assets/tole/manifest.json based on images in that folder.
+// Generates public/assets/tole/manifest.json based on images in that folder.
 
 const fs = require("fs");
 const path = require("path");
 
 const projectRoot = path.join(__dirname, "..");
-const folder = path.join(projectRoot, "assets", "tole");
+const folder = path.join(projectRoot, "public", "assets", "tole");
 const outFile = path.join(folder, "manifest.json");
 
 // Allowed image extensions
@@ -21,13 +21,14 @@ function main() {
     process.exit(1);
   }
 
-  const files = fs.readdirSync(folder)
-    .filter(f => exts.has(path.extname(f).toLowerCase()))
+  const files = fs
+    .readdirSync(folder)
+    .filter((f) => exts.has(path.extname(f).toLowerCase()))
     .sort(naturalSort);
 
   const manifest = {
-    basePath: "./assets/tole/",
-    images: files
+    basePath: "/assets/tole/",
+    images: files,
   };
 
   fs.writeFileSync(outFile, JSON.stringify(manifest, null, 2), "utf8");
