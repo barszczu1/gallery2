@@ -43,31 +43,35 @@
           ✕
         </button>
 
-        <button
-          id="prevBtn"
-          class="lightbox__nav lightbox__nav--left"
-          type="button"
-          aria-label="Previous image"
-        >
-          ‹
-        </button>
+        <div class="lightbox__layout">
+          <button
+            id="prevBtn"
+            class="lightbox__nav lightbox__nav--left"
+            type="button"
+            aria-label="Previous image"
+          >
+            ‹
+          </button>
 
-        <figure class="lightbox__figure">
-          <img id="lightboxImg" class="lightbox__img" alt="" />
-          <figcaption
-            id="lightboxCaption"
-            class="lightbox__caption"
-          ></figcaption>
-        </figure>
+          <figure class="lightbox__figure">
+            <div class="lightbox__media">
+              <img id="lightboxImg" class="lightbox__img" alt="" />
+            </div>
+            <figcaption
+              id="lightboxCaption"
+              class="lightbox__caption"
+            ></figcaption>
+          </figure>
 
-        <button
-          id="nextBtn"
-          class="lightbox__nav lightbox__nav--right"
-          type="button"
-          aria-label="Next image"
-        >
-          ›
-        </button>
+          <button
+            id="nextBtn"
+            class="lightbox__nav lightbox__nav--right"
+            type="button"
+            aria-label="Next image"
+          >
+            ›
+          </button>
+        </div>
       </div>
     </div>
 

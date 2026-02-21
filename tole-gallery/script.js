@@ -102,21 +102,7 @@ function closeLightbox() {
     LIGHTBOX.classList.remove("is-closing");
   }, delay);
 }
-function closeLightbox() {
-  LIGHTBOX.classList.remove("is-visible");
-  LIGHTBOX.setAttribute("aria-hidden", "true");
-  document.documentElement.style.overflow = "";
 
-  // wait for transition to finish, then fully hide
-  const prefersReduced = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
-  const delay = prefersReduced ? 0 : 240;
-
-  window.setTimeout(() => {
-    LIGHTBOX.classList.remove("is-open");
-  }, delay);
-}
 
 function renderLightbox() {
   const filename = images[currentIndex];
